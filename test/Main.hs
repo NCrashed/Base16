@@ -86,6 +86,7 @@ tests = testGroup "Base16 Tests"
   , testCase "isBase16" $
     assertBool "accepts invalid hex" $
       isBase16 valids && not (L.any B16.isBase16 invalids)
+  , regressionVectors
   ]
 
 valids :: BS.ByteString
@@ -201,6 +202,31 @@ prop_bos_coherence = testGroup "prop_bos_coherence"
 
 -- ---------------------------------------------------------------- --
 -- Unit tests
+
+regressionVectors :: TestTree
+regressionVectors = testGroup "Regression tests" [
+    testGroup "init and tail" 
+      [ initTestCase "fo" "666f" "6f" "66"
+      ]
+  ]
+  where 
+    initTestCase s t tt ti = 
+      testCaseSteps (show $ if s == "" then "empty" else s) $ \step -> do
+
+        step "encode is sound"
+        t @=? extractBase16 (B16.encodeBase16' s)
+
+        step "decode is sound"
+        s @=? B16.decodeBase16 (assertBase16 t)
+
+        step "decodeUntyped is sound"
+        Right s @=? B16.decodeBase16Untyped (extractBase16 $ encode s)
+
+        step "Tail works"
+        tt @=? extractBase16 (B16.encodeBase16' $ BS.tail s)
+
+        step "Init works"
+        ti @=? extractBase16 (B16.encodeBase16' $ BS.init s)
 
 rfcVectors :: forall a b proxy. Harness a b => proxy a -> TestTree
 rfcVectors _ = testGroup "RFC 4648 Test Vectors"

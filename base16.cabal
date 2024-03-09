@@ -52,10 +52,10 @@ library
 
   build-depends:
       base        >=4.14 && <4.20
-    , bytestring  >=0.11 && <0.13
+    , bytestring  >=0.10 && <0.13
     , deepseq     >=1.4.4.0 && <1.6
     , primitive   >=0.6  && <0.10
-    , text        >= 2.0 && <2.2
+    , text        >= 1.2 && <2.2
     , text-short  ^>=0.1
 
   hs-source-dirs:   src
@@ -72,13 +72,13 @@ test-suite base16-tests
       base               >=4.14 && <4.20
     , base16
     , base16-bytestring  >=1.0
-    , bytestring         >=0.11
+    , bytestring         >=0.10
     , QuickCheck
     , random-bytestring
     , tasty
     , tasty-hunit
     , tasty-quickcheck
-    , text               >=2.0
+    , text               >=1.2
     , text-short
 
 benchmark bench
@@ -90,8 +90,8 @@ benchmark bench
       base               >=4.14 && <4.20
     , base16
     , base16-bytestring  >=1.0
-    , bytestring         >=0.11
+    , bytestring         >=0.10
     , criterion
     , deepseq
     , random-bytestring
-    , text               >=2.0
+    , text               >=1.2

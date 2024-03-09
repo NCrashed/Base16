@@ -36,19 +36,19 @@ import System.IO.Unsafe
 -- | Head of the base16 encoding loop - marshal data, assemble loops
 --
 encodeBase16_ :: ByteString -> ByteString
-encodeBase16_ (BS sfp slen) =
+encodeBase16_ (PS sfp offset slen) =
     unsafeCreate dlen $ \dptr ->
       withForeignPtr sfp $ \sptr -> do
         innerLoop
           dptr
-          sptr
-          (plusPtr sptr slen)
+          (plusPtr sptr offset)
+          (plusPtr sptr (slen + offset))
   where
     !dlen = 2 * slen
 {-# INLINE encodeBase16_ #-}
 
 decodeBase16_ :: ByteString -> Either Text ByteString
-decodeBase16_ (BS sfp slen)
+decodeBase16_ (PS sfp offset slen)
   | slen == 0 = Right BS.empty
   | r /= 0 = Left "invalid bytestring size"
   | otherwise = unsafeDupablePerformIO $ do
@@ -58,8 +58,8 @@ decodeBase16_ (BS sfp slen)
         decodeLoop
           dfp
           dptr
-          sptr
-          (plusPtr sptr slen)
+          (plusPtr sptr offset)
+          (plusPtr sptr (slen + offset))
           q
   where
     !q = slen `quot` 2
@@ -67,19 +67,19 @@ decodeBase16_ (BS sfp slen)
 {-# INLINE decodeBase16_ #-}
 
 decodeBase16Typed_ :: Base16 ByteString -> ByteString
-decodeBase16Typed_ (Base16 (BS sfp slen)) =
+decodeBase16Typed_ (Base16 (PS sfp offset slen)) =
   unsafeCreate q $ \dptr ->
     withForeignPtr sfp $ \sptr ->
       decodeLoopTyped
         dptr
-        sptr
-        (plusPtr sptr slen)
+        (plusPtr sptr offset)
+        (plusPtr sptr (slen + offset))
   where
     !q = slen `quot` 2
 {-# INLINE decodeBase16Typed_ #-}
 
 decodeBase16Lenient_ :: ByteString -> ByteString
-decodeBase16Lenient_ (BS sfp slen) =
+decodeBase16Lenient_ (PS sfp offset slen) =
   unsafeDupablePerformIO $ do
     dfp <- mallocPlainForeignPtrBytes q
     withForeignPtr dfp $ \dptr ->
@@ -87,8 +87,8 @@ decodeBase16Lenient_ (BS sfp slen) =
         lenientLoop
           dfp
           dptr
-          sptr
-          (plusPtr sptr slen)
+          (plusPtr sptr offset)
+          (plusPtr sptr (slen + offset))
           0
   where
     !q = slen `quot` 2
